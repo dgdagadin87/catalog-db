@@ -43,7 +43,7 @@ TABLESPACE pg_default;
 INSERT INTO catalog.order_state (order_state_code, order_state_name) VALUES
     ('BOUNCED_DONE', 'Оплачен, выполнен'),
     ('CANCELLED', 'Отменен'),
-    ('DONE', 'Выполнен'),
+    ('DONE', 'Закрыт'),
     ('DONE_WITHOUT_BOUNCE', 'Выполнен без оплаты');
 
 -- DROP TABLE catalog.order_source;
@@ -86,14 +86,26 @@ WITH (
 )
 TABLESPACE pg_default;
 
+-- DROP TABLE catalog.platform;
+CREATE TABLE catalog.platform
+(
+    platform_id SERIAL PRIMARY KEY NOT NULL,
+    platform_name character varying(50) NOT NULL,
+    platform_table_name character varying(50) NOT NULL
+)
+WITH (
+    OIDS = TRUE
+)
+TABLESPACE pg_default;
+
 -- DROP TABLE catalog.scene;
 CREATE TABLE catalog.scene
 (
     scene_id character varying(4000) PRIMARY KEY COLLATE pg_catalog."default" NOT NULL,
     stereo_scene_id character varying(4000) COLLATE pg_catalog."default",
-    scene_platform_name character varying(50) NOT NULL,
-    scene_table_name character varying(50) NOT NULL,
-    scene_identity_value BIGINT NOT NULL
+    scene_platform_id BIGINT NOT NULL,
+    scene_identity_value BIGINT NOT NULL,
+    FOREIGN KEY (scene_platform_id) REFERENCES catalog.platform (platform_id),
 )
 WITH (
     OIDS = TRUE
@@ -119,8 +131,7 @@ TABLESPACE pg_default;
 CREATE TABLE catalog.parameter
 (
     parameter_id BIGSERIAL PRIMARY KEY NOT NULL,
-    parameter_name character varying(50) NOT NULL,
-    parameter_table_name character varying(50) NOT NULL,
+    parameter_name character varying(100) NOT NULL,
     parameter_column_name character varying(50) NOT NULL
 )
 WITH (
@@ -128,15 +139,15 @@ WITH (
 )
 TABLESPACE pg_default;
 
--- DROP TABLE catalog.parameter_2_scene;
-CREATE TABLE catalog.parameter_2_scene
+-- DROP TABLE catalog.platform_2_parameter;
+CREATE TABLE catalog.platform_2_parameter
 (
-    parameter_2_scene_id BIGSERIAL PRIMARY KEY NOT NULL,
+    platform_2_parameter_id BIGSERIAL PRIMARY KEY NOT NULL,
+    platform_id BIGINT NOT NULL,
     parameter_id BIGINT NOT NULL,
-    scene_id character varying(4000) COLLATE pg_catalog."default" NOT NULL,
-    UNIQUE (parameter_id, scene_id),
-    FOREIGN KEY (parameter_id) REFERENCES catalog.parameter (parameter_id),
-    FOREIGN KEY (scene_id) REFERENCES catalog.scene (scene_id)
+    UNIQUE (platform_id, parameter_id),
+    FOREIGN KEY (platform_id) REFERENCES catalog.platform (platform_id),
+    FOREIGN KEY (parameter_id) REFERENCES catalog.parameter (parameter_id)
 )
 WITH (
     OIDS = TRUE
