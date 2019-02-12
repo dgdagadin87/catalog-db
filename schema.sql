@@ -105,7 +105,7 @@ CREATE TABLE catalog.scene
     stereo_scene_id character varying(4000) COLLATE pg_catalog."default",
     scene_platform_id BIGINT NOT NULL,
     scene_identity_value BIGINT NOT NULL,
-    FOREIGN KEY (scene_platform_id) REFERENCES catalog.platform (platform_id),
+    FOREIGN KEY (scene_platform_id) REFERENCES catalog.platform (platform_id)
 )
 WITH (
     OIDS = TRUE
